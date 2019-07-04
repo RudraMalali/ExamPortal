@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using MetroFramework.Forms;
 
 namespace ExamPortal
 {
-    public partial class Login : Form
+    public partial class Login : MetroForm
     {
         public SqlConnection con;
         public string connection;
@@ -48,13 +49,13 @@ namespace ExamPortal
             sda.Fill(dt);
             if (dt.Rows[0][0].ToString() == "1")
             {
-                MessageBox.Show("Login Successfull");
-                Exam ex = new Exam();
+                //MessageBox.Show("Login Successfull");
+                Instructions ins = new Instructions();
                 this.Hide();
-                ex.ShowDialog();
+                ins.ShowDialog();
             }
             else
-                MessageBox.Show("Invalid username or password");
+                MessageBox.Show("Invalid username or password","Try Again");
 
         }
 

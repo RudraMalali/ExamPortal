@@ -10,11 +10,12 @@ using System.Windows.Forms;
 using System.Data.SqlClient;
 using Timers=System.Timers;
 using System.Timers;
+using MetroFramework.Forms;
 
 namespace ExamPortal
 {
     
-    public partial class Exam : Form
+    public partial class Exam : MetroForm
     {
         Timers.Timer timer=null;
         string connstring;
@@ -25,10 +26,15 @@ namespace ExamPortal
         public Exam()
         {
             InitializeComponent();
+            timer = new System.Timers.Timer(1000);
+            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            timer.Enabled = true;
+            timer.SynchronizingObject = this;
+            timer.AutoReset = true;
             //timer = new Timers.Timer(10000);
             //timer.Elapsed += this.nxtq;
             //timer.SynchronizingObject = this;
-            
+
         }
 
         private void Timer1_Tick(object sender, EventArgs e)
@@ -80,13 +86,13 @@ namespace ExamPortal
         }
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            global.cnt += 1;
-            if(global.cnt==10)
+            global.cnt -= 1;
+            if(global.cnt==0)
             {
                 testfn();
-                global.cnt = 0;
+                global.cnt = 10;
             }
-            label2.Text = e.SignalTime.ToString();
+            label2.Text = Convert.ToString(global.cnt);
             
         }
         private void testfn()
@@ -148,23 +154,39 @@ namespace ExamPortal
 
 
                 command.Dispose();
+                con.Close();
 
             }
             //Test Finished Indicator Block
             else
             {
-                button1.Text = Convert.ToString(global.marks);
+                label2.Visible=false;
+                //button1.Text = Convert.ToString(global.marks);
+                string msg = "Your result is :- "+global.marks;
+                string title = "Test Finished";
+                MessageBoxButtons buttons = MessageBoxButtons.RetryCancel;
+                DialogResult obj = MessageBox.Show(msg,title,buttons);
+                if(obj== DialogResult.Retry)
+                {
+                    Login lg = new Login();
+                    this.Hide();
+                    lg.ShowDialog();
+                }
+                else
+                {
+                    con.Close();
+                    Application.Exit();
+                }
+                
             }
             con.Close();
     }
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            timer = new System.Timers.Timer(1000);
-            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            timer.Enabled = true;
-            timer.SynchronizingObject = this;
-            timer.AutoReset = true;
+            timer.Stop();
+            global.cnt = 10;
+            timer.Start();
             testfn();
         }  
         
@@ -176,7 +198,7 @@ namespace ExamPortal
     }
     static class global
     {
-        public static int opt, marks,cnt=0;
+        public static int opt, marks,cnt=10;
         public static string sopt;
     }
 }

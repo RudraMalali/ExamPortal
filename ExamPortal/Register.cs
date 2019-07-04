@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using MetroFramework.Forms;
 
 namespace ExamPortal
 {
-    public partial class Register : Form
+    public partial class Register : MetroForm
     {
 
         public SqlConnection con;
@@ -39,7 +40,7 @@ namespace ExamPortal
         //function to validate form before submitting
         public bool Validate_form(string email, string conno, string passwd)
         {
-            bool isCnValid, isPassValid, isEmValid;
+            bool isCnValid, isPassValid, isEmValid,emExists;
 
             //Email validation
             Regex regex = new Regex(@"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$");
@@ -61,6 +62,14 @@ namespace ExamPortal
                 MessageBox.Show("Please enter correct Email-Id!");
             }
 
+            if (Check_existing(email))
+            {
+                MessageBox.Show("Email exists!");
+                emExists = false;
+            }
+            else
+                emExists = true;
+
             //contact number validation
             if (conno.Length != 10)
             {
@@ -70,26 +79,28 @@ namespace ExamPortal
             else
                 isCnValid = true;
 
-            if (isCnValid && isEmValid && isPassValid)
+            if (isCnValid && isEmValid && isPassValid&&emExists)
                 return true;
             else
                 return false;
         }
 
-        public void check_existing(String email)
+        public bool Check_existing(String email)
         {
-            SqlDataAdapter sda = new SqlDataAdapter("SELECT Email FROM RegisteredStudents", con); 
-             DataTable dt = new DataTable();
-            sda.Fill(dt);
-            foreach(DataRow row in dt.Rows)
+            
+            SqlCommand command  = new SqlCommand("Select * from RegisteredStudents",con);
+            SqlDataReader chckmail = command.ExecuteReader();
+            while(chckmail.Read())
+            {
+                if(email==Convert.ToString(chckmail.GetValue(5)))
                 {
-                    if(row.ToString()==email)
-                    {
-                        MessageBox.Show("Email ID already exists!");
-                        return true;
-                    }
-                    
+                    chckmail.Close();
+                    return true;
                 }
+            }
+            chckmail.Close();
+            return false;
+
         }
 
         //reset form
@@ -115,7 +126,7 @@ namespace ExamPortal
             String email = textBox5.Text;
             String passwd = textBox6.Text;
 
-            check_existing(email);
+            
 
             if ((Validate_form(email, conno, passwd)))
             {
@@ -156,6 +167,16 @@ namespace ExamPortal
         }
 
         private void Register_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Label2_Click(object sender, EventArgs e)
         {
 
         }
