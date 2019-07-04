@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -76,6 +76,22 @@ namespace ExamPortal
                 return false;
         }
 
+        public void check_existing(String email)
+        {
+            SqlDataAdapter sda = new SqlDataAdapter("SELECT Email FROM RegisteredStudents", con); 
+             DataTable dt = new DataTable();
+            sda.Fill(dt);
+            foreach(DataRow row in dt.Rows)
+                {
+                    if(row.ToString()==email)
+                    {
+                        MessageBox.Show("Email ID already exists!");
+                        return true;
+                    }
+                    
+                }
+        }
+
         //reset form
         public void Clear()
         {
@@ -98,6 +114,8 @@ namespace ExamPortal
             String conno = textBox4.Text;
             String email = textBox5.Text;
             String passwd = textBox6.Text;
+
+            check_existing(email);
 
             if ((Validate_form(email, conno, passwd)))
             {
