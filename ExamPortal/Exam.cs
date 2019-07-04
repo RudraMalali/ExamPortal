@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using Timers=System.Timers;
 using System.Timers;
 
 namespace ExamPortal
@@ -15,7 +16,7 @@ namespace ExamPortal
     
     public partial class Exam : Form
     {
-        private static System.Timers.Timer timer;
+        Timers.Timer timer=null;
         string connstring;
         SqlConnection con;
         SqlCommand command;
@@ -24,9 +25,17 @@ namespace ExamPortal
         public Exam()
         {
             InitializeComponent();
+            //timer = new Timers.Timer(10000);
+            //timer.Elapsed += this.nxtq;
+            //timer.SynchronizingObject = this;
+            
         }
 
         private void Timer1_Tick(object sender, EventArgs e)
+        {
+
+        }
+        private void nxtq(Object source,Timers.ElapsedEventArgs e)
         {
 
         }
@@ -69,13 +78,19 @@ namespace ExamPortal
             
 
         }
-
-        private void Button1_Click(object sender, EventArgs e)
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            timer = new System.Timers.Timer(1000);
-            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            timer.Enabled = true;
-            tlabl:
+            global.cnt += 1;
+            if(global.cnt==10)
+            {
+                testfn();
+                global.cnt = 0;
+            }
+            label2.Text = e.SignalTime.ToString();
+            
+        }
+        private void testfn()
+        {
             if (radioButton1.Checked == true)
             {
                 global.opt = 1;
@@ -98,23 +113,23 @@ namespace ExamPortal
             }
             else
                 global.opt = 99;
-        
+
             con.Open();
             string qvar = label1.Text;
-            string q = "SELECT * FROM quiz where question = '" + qvar+"'";
+            string q = "SELECT * FROM quiz where question = '" + qvar + "'";
             command = new SqlCommand(q, con);
             dr = command.ExecuteReader();
-            
-                while (dr.Read())
-                {
-                    if (global.opt == Convert.ToInt32(dr.GetValue(6)))
-                        global.marks += 1;
-                }
-                dr.Close();
-                command.Dispose();
 
-                command = new SqlCommand("SELECT TOP 1 * FROM quizview where flag=0 ORDER BY NEWID()", con);
-                dr = command.ExecuteReader();
+            while (dr.Read())
+            {
+                if (global.opt == Convert.ToInt32(dr.GetValue(6)))
+                    global.marks += 1;
+            }
+            dr.Close();
+            command.Dispose();
+
+            command = new SqlCommand("SELECT TOP 1 * FROM quizview where flag=0 ORDER BY NEWID()", con);
+            dr = command.ExecuteReader();
             if (dr.HasRows)
             {
                 while (dr.Read())
@@ -133,19 +148,26 @@ namespace ExamPortal
 
 
                 command.Dispose();
-                
+
             }
+            //Test Finished Indicator Block
             else
             {
                 button1.Text = Convert.ToString(global.marks);
             }
             con.Close();
-        }
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
+    }
+
+        private void Button1_Click(object sender, EventArgs e)
         {
-            //label2.Text = e.SignalTime.ToString();
-            //goto tlabl;
-        }
+            timer = new System.Timers.Timer(1000);
+            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            timer.Enabled = true;
+            timer.SynchronizingObject = this;
+            timer.AutoReset = true;
+            testfn();
+        }  
+        
 
         private void RadioButton1_CheckedChanged(object sender, EventArgs e)
         {
@@ -154,7 +176,7 @@ namespace ExamPortal
     }
     static class global
     {
-        public static int opt, marks;
+        public static int opt, marks,cnt=0;
         public static string sopt;
     }
 }
