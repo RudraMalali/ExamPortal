@@ -8,18 +8,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using System.Timers;
 
 namespace ExamPortal
 {
     
-    public partial class Form1 : Form
+    public partial class Exam : Form
     {
+        private static System.Timers.Timer timer;
         string connstring;
         SqlConnection con;
         SqlCommand command;
         SqlDataAdapter da = new SqlDataAdapter();
         SqlDataReader dr;
-        public Form1()
+        public Exam()
         {
             InitializeComponent();
         }
@@ -70,6 +72,10 @@ namespace ExamPortal
 
         private void Button1_Click(object sender, EventArgs e)
         {
+            timer = new System.Timers.Timer(1000);
+            timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            timer.Enabled = true;
+            tlabl:
             if (radioButton1.Checked == true)
             {
                 global.opt = 1;
@@ -134,6 +140,11 @@ namespace ExamPortal
                 button1.Text = Convert.ToString(global.marks);
             }
             con.Close();
+        }
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            //label2.Text = e.SignalTime.ToString();
+            //goto tlabl;
         }
 
         private void RadioButton1_CheckedChanged(object sender, EventArgs e)
